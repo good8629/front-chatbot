@@ -40,6 +40,7 @@ export default function Talk() {
     const [dropdownLanguage, setDropdownLanguage] = useState("Model");
     const [isSend, setIsSend] = useState(true);             // 기본 보내기 가능
     const initMessage = "Lenovo TechDay'25 It's Time for AI-nomics 상담을 도와주는 챗봇입니다.";
+    const [randomKey, setRandomKey] = useState<number | null>(null);
     const [Messages, setMessages] = useState<Message[]>([
         { 
             message: initMessage, 
@@ -81,14 +82,20 @@ export default function Talk() {
             videos: []
         }])
 
-    }, [searchParams]); // searchParams가 변경될 때 실행
+        if (randomKey === null) {
+            setRandomKey(Math.floor(Math.random() * 1000000));
+        }
+
+    }, [searchParams, randomKey]); // searchParams가 변경될 때 실행
 
     const sendMessageToServer = async (userQuestion: string) => {
+        console.log(randomKey);
+
         try {
             const res = await fetch("/api/openapi", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: userQuestion, llmModel: dropdownLanguage}),
+                body: JSON.stringify({ question: userQuestion, llmModel: dropdownLanguage, key: randomKey}),
             });
 
             if (!res.ok) {
