@@ -2,10 +2,11 @@
 
 "use client";
 
-import styles from './talk.module.css';
-import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from "next/navigation";
+import { useModalStore } from "@/store/useModalStore";
+import styles from './talk.module.css';
+import Image from 'next/image';
 import Link from "next/link";
 
 interface Message {
@@ -37,10 +38,8 @@ export default function Talk() {
     const [typingMessage, setTypingMessage] = useState<string>("");
     const [placeholderMessage, setPlaceholderMessage] = useState("대화를 입력 해보세요.");
     const [dropdownLanguage, setDropdownLanguage] = useState("Model");
-    
     const [isSend, setIsSend] = useState(true);             // 기본 보내기 가능
-    
-    const initMessage = "Lenovo TechDay'25 It's Time for AI-nomics 상담을 도와주는 챗봇";
+    const initMessage = "Lenovo TechDay'25 It's Time for AI-nomics 상담을 도와주는 챗봇입니다.";
     const [Messages, setMessages] = useState<Message[]>([
         { 
             message: initMessage, 
@@ -125,7 +124,6 @@ export default function Talk() {
 
             // 2. 입력 필드 초기화
             setQuestion("");
-            //setIsLoading(false);
             typingEffect(reMessage);
 
         } catch (error) {
@@ -133,7 +131,6 @@ export default function Talk() {
             console.error("Error while sending request:", error);
         } finally {
             setIsSend(false);
-            //setIsLoading(false);
         }
     };
 
@@ -196,7 +193,7 @@ export default function Talk() {
         if (event.key === "Enter" && !enterPressed.current) {
             enterPressed.current = true;
             handleSubmit();         // Enter 키를 누르면 버튼 클릭 실행
-            setTimeout(() =>{
+            setTimeout(() => {
                 enterPressed.current = false;
             }, 500);
         }
@@ -279,7 +276,12 @@ export default function Talk() {
                 </button>
             )
         }
-    } 
+    }
+    
+    //
+    const sendMessageToParent = (data: string) => {
+        localStorage.setItem("modalData", JSON.stringify({ type: "OPEN_MODAL", data }));
+    };
 
     // 메시지가 추가될 때 스크롤을 맨 아래로 이동 (채팅 스크롤 최하단 유지기능)
     const chatEndRef = useRef<HTMLDivElement | null>(null); // 마지막 메시지 참조
@@ -287,7 +289,14 @@ export default function Talk() {
         if (chatEndRef.current) {
             chatEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
+
+        // 특정 드롭다운 값 선택 시 부모에게 메시지 전송
+        sendMessageToParent(dropdownLanguage);
+
     }, [Messages, typingMessage]); // messages 또는 typingMessage가 변경될 때 실행
+
+    //
+    const openModal = useModalStore((state) => state.openModel);
 
     return(
         <>
@@ -296,7 +305,7 @@ export default function Talk() {
                     <Image src="/images/img-chat-logo.png" alt="logo" width={116} height={35}></Image>
                     <p className={styles.wrap_width}>
                     </p>
-                    <Link href="/i/language" className={styles.lan_btn}>
+                    <Link href="/i/language" className={styles.lan_btn} onClick={() => openModal(dropdownLanguage)}>
                         {dropdownLanguage} <Image src="/images/ico-dropdown.svg" alt="dropdown" width={18} height={10}/>
                     </Link>
                 </div>

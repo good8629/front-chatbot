@@ -3,7 +3,8 @@
 import styles from "./talk.module.css";
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useModalStore } from "@/store/useModalStore";
 
 export default function LanguageModal() {
     const router = useRouter();
@@ -22,6 +23,13 @@ export default function LanguageModal() {
         setSelectedLang(lang);
         router.push(`/?selectedLang=${encodeURIComponent(lang)}`); // URL 업데이트
     };
+
+    const { isOpen, data } = useModalStore();
+    if(data !== '') {
+        useEffect(() => {
+            setSelectedLang(data);
+        }, []);
+    }
 
     return(
         <>
