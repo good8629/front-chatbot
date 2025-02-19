@@ -21,7 +21,7 @@ export default function Home() {
 
         if (isMobile) {
             // 모바일 페이지로 리다이렉트
-            router.push("/mobile");
+            router.push("/");
         }
 
         const handleStorageChange = (event: StorageEvent) => {
@@ -77,7 +77,6 @@ export default function Home() {
                 <div className={styles.pc_container}>
                     <div className={styles.pc_left}>
                         {modelInfo()}
-                        {/* <Image src="/images/info-techday.png" alt="Chat AI Demo Version infomation" width={631} height={700}></Image> */}
                     </div>
                     <div className={styles.pc_right}>
                         <iframe src="/" width="393" height="700" className={styles.pc_background}></iframe>
