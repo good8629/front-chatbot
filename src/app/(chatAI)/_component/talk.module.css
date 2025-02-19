@@ -143,7 +143,18 @@ background-color: var(--white);
     gap: 10px;
 }
 .youtube_wrap img {
+    width: 100%;
+}
+
+.youtube_a {
     width: 40%;
+}
+
+.youtube_p {
+    width: 60%;
+    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: hidden;
 }
   
 /* footer */
