@@ -156,6 +156,11 @@ background-color: var(--white);
     white-space: normal;
     overflow: hidden;
 }
+
+/* restaurant */
+.restaurant_map {
+    width: 100%;
+}
   
 /* footer */
 .footer_inner {

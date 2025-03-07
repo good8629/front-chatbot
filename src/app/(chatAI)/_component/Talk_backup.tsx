@@ -15,7 +15,6 @@ interface Message {
     action: string;
     urls: string[];
     videos: YouTubes[];
-    sub_info?: SubInfo;
 }
 
 interface YouTubes{
@@ -30,12 +29,6 @@ interface responseMessage {
     action: string;
     urls: string[];
     videos: YouTubes[];
-    sub_info: SubInfo;
-}
-
-interface SubInfo {
-    location: string;
-    restaurant: string;
 }
 
 export default function Talk() {
@@ -46,7 +39,7 @@ export default function Talk() {
     const [placeholderMessage, setPlaceholderMessage] = useState("대화를 입력 해보세요.");
     const [dropdownLanguage, setDropdownLanguage] = useState("Model");
     const [isSend, setIsSend] = useState(true);             // 기본 보내기 가능
-    const initMessage = "투기브랩스 테스트 챗봇.";
+    const initMessage = "Lenovo TechDay'25 It's Time for AI-nomics 상담을 도와주는 챗봇입니다.";
     const [randomKey, setRandomKey] = useState<number | null>(null);
     const [Messages, setMessages] = useState<Message[]>([
         { 
@@ -54,7 +47,7 @@ export default function Talk() {
             autherType: 0, 
             action: "MS001", 
             urls: [],
-            videos: []
+            videos: [] 
         }
     ]);
 
@@ -96,6 +89,8 @@ export default function Talk() {
     }, [searchParams, randomKey]); // searchParams가 변경될 때 실행
 
     const sendMessageToServer = async (userQuestion: string) => {
+        console.log(randomKey);
+
         try {
             const res = await fetch("/api/openapi", {
                 method: "POST",
@@ -116,19 +111,17 @@ export default function Talk() {
 
             // 유튜브 영상일때 전달받음
             let videos = [];
-            if (data.info.action == "MS002") {
+            if(data.info.action == "MS002") {
                 videos = data.info.sub_info.videos;
             }
 
-            // 맛집
-            let eats = [];
-            let location = '';
-            let restaurant = '';
-            if (data.info.action == "MS004") {
-                eats = data.info.sub_info;
-                location = data.info.sub_info.location;
-                restaurant = data.info.sub_info.restaurant;
-            }
+            const reMessage: responseMessage = {
+                question: data.question,
+                answer: data.info.message,
+                action: data.info.action,
+                urls: urls,
+                videos: videos
+            };
 
             // 3. AI 답변을 타이핑 효과로 표시하기 전에 빈 AI 메시지 블록 추가
             setMessages((prevMessages) => [
@@ -136,23 +129,9 @@ export default function Talk() {
                 { message: "", autherType: 0, action: data.info.action, urls: urls, videos: [] } // 빈 메시지 추가 후 타이핑
             ]);
 
-            const reMessage: responseMessage = {
-                question: data.question,
-                answer: data.info.message,
-                action: data.info.action,
-                urls: urls,
-                videos: videos,
-                sub_info: eats
-            };
-
-            if (data.info.action === "MS001" || data.info.action === "MS002" || data.info.action === "MS003") {
-                typingEffect(reMessage);
-            } else if(data.info.action === "MS004") {
-                restaurantInfo(location, restaurant, reMessage);
-            }
-
-            // 4. 입력 필드 초기화
+            // 2. 입력 필드 초기화
             setQuestion("");
+            typingEffect(reMessage);
 
         } catch (error) {
             setIsSend(false);
@@ -176,30 +155,28 @@ export default function Talk() {
         }, 50);
 
         //enterPressed.current = false; // 다시 입력 가능하도록 초기화
+
         sendMessageToServer(question);
 
-        // 사용자 질문 추가
+        // 1️. 사용자 질문 추가
         setMessages((prevMessages) => [
             ...prevMessages,
             { message: question, autherType: 1, action: 'MS001', urls: [], videos: [] }
         ]);
 
-        // 입력 필드 초기화
+        // 2. 입력 필드 초기화
         setQuestion("");
     }
 
-    // 글자 효과를 줍니다.
     const typingEffect = (reMessage: responseMessage) => {
         let index = 0;
         setTypingMessage(""); // 기존 텍스트 초기화
         const typingInterval = setInterval(() => {
             if (index < reMessage.answer.length - 1) {
-                setTypingMessage((prev) => prev + (reMessage.answer[index - 1] == undefined ? reMessage.answer[index] : reMessage.answer[index - 1]));
-                //setTypingMessage((prev) => prev + reMessage.answer[index - 1]);
+                setTypingMessage((prev) => prev + reMessage.answer[index -1])
                 index++;
             } else {
                 clearInterval(typingInterval);
-
                 setMessages((prevMessages) => {
                     const updatedMessages = [...prevMessages];
                     updatedMessages[updatedMessages.length - 1] = {
@@ -207,8 +184,7 @@ export default function Talk() {
                         autherType: 0,
                         action: reMessage.action,
                         urls: reMessage.urls,
-                        videos: reMessage.videos,
-                        sub_info: reMessage.sub_info
+                        videos: reMessage.videos
                     };
                     
                     setIsSend(true);            // 입력 완료시점
@@ -219,45 +195,6 @@ export default function Talk() {
             }
         }, reMessage.answer.length > 100 ? 20 : 50);
     };
-
-    // action의 정보가 음식 정보이면 식당정보를 만들어 줍니다.
-    const restaurantInfo = async (location: string, restaurant: string, reMessage: responseMessage) => {
-        try {
-            const res = await fetch("/api/agent/restaurants", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ location: location, restaurant: restaurant})
-            });
-
-            const data = await res.json();
-
-            if(data.places.length > 0) {
-                // 4.5점 이상의 음식점 필터링
-                const filteredPlaces = data.places.filter((place: any) => place.rating >= 4.5);
-                
-                if(filteredPlaces.length == 0) {
-                    reMessage.answer = "평점 4.5 이상의 맛집 음식점만 노출되도록 필터링이 되어있습니다.";
-                } else {
-                    // reMessage.answer = `🔎 ${location}에서 추천하는 ${restaurant} 맛집:\n${filteredPlaces
-                    //     .map((place: any, index: number) => `🍽️ ${index + 1}. ${place.displayName.text} (⭐ ${place.rating})`)
-                    //     .join("\n")}`;
-
-                    reMessage.answer = `🔎 ${location}에서 추천하는 ${restaurant} 맛집:\n${filteredPlaces
-                        .map((place: any, index: number) => `🍽️ ${index + 1}. ${place.displayName.text} (⭐ ${place.rating})`)
-                        .join("\n")}`;
-                }
-                
-                typingEffect(reMessage);
-            }
-
-            if (!res.ok) {
-                throw new Error(`Error: `);
-            }
-            
-        } catch (e) {
-
-        }
-    }
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "Enter" && !enterPressed.current) {
@@ -299,27 +236,14 @@ export default function Talk() {
                 </>
             )
         } else if(msg.action == "MS004") {              // 식당
-            // return(
-            //     <>
-            //         <div className={styles.lef_chat_con}>
-            //             {msg.message}
-            //         </div>
-            //     </>
-            // )
-            if (index === Messages.length - 1 && typingMessage) {
-                return (
+            return(
+                <>
                     <div className={styles.lef_chat_con}>
-                        {typingMessage}
+                        <Image src="/images/img-restr01.png" alt="weather" width={292} height={120.26}></Image>
                     </div>
-                );
-            } else {
-                return (
-                    <div className={styles.lef_chat_con}>
-                        {msg.message}
-                    </div>
-                );
-            }
-        } else {
+                </>
+            )
+        } else{
             return(
                 <>
                     <div className={styles.lef_chat_con}>
@@ -330,7 +254,6 @@ export default function Talk() {
         }
     };
 
-    // youtube action
     const youtubeMessage = (msg: Message) => {
         return(
             msg.videos.map((item, index) => (
@@ -343,15 +266,6 @@ export default function Talk() {
                     </p>
                 </div>
             ))
-        )
-    }
-
-    // restaurant action
-    const restaurantMessage = async (msg: Message) => {
-        return(
-            <div>
-               {/* {msg.sub_info?.location} {msg.sub_info?.restaurant}  */}
-            </div>
         )
     }
 
@@ -371,7 +285,7 @@ export default function Talk() {
         }
     }
     
-    // 값 전달
+    //
     const sendMessageToParent = (data: string) => {
         localStorage.setItem("modalData", JSON.stringify({ type: "OPEN_MODAL", data }));
     };
@@ -436,9 +350,6 @@ export default function Talk() {
                         <input type="text" placeholder={placeholderMessage} value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={handleKeyDown}/>
                         {sendMessage()}
                     </div>
-                    {/* <button type="submit" onClick={placeTestButton}>
-                        <Image src="/images/ico-send.svg" alt="send" width={50} height={40}/>
-                    </button> */}
                 </div>
             </footer>
         </>
