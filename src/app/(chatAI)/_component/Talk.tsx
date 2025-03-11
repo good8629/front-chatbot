@@ -108,6 +108,7 @@ export default function Talk() {
             }
 
             const data = await res.json();
+            console.log(data);
 
             let urls = [];
             if (data.info.action != 'MS001') {
@@ -233,7 +234,9 @@ export default function Talk() {
 
             if(data.places.length > 0) {
                 // 4.5점 이상의 음식점 필터링
-                const filteredPlaces = data.places.filter((place: any) => place.rating >= 4.5);
+                //const filteredPlaces = data.places.filter((place: any) => parseFloat(place.rating) >= 4.5).sort((a: any, b: any) => parseFloat(b.rating) - parseFloat(a.rating));
+                // ✅ 4.5 이상 평점 필터링 & 내림차순 정렬 (문자형 방지)
+                const filteredPlaces = data.places.filter((place: any) => parseFloat(place.rating) >= 4.5).sort((a: any, b: any) => parseFloat(b.rating) - parseFloat(a.rating)); // 🔽 내림차순 정렬
                 
                 if(filteredPlaces.length == 0) {
                     reMessage.answer = "평점 4.5 이상의 맛집 음식점만 노출되도록 필터링이 되어있습니다.";
