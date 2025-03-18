@@ -2,9 +2,8 @@
 
 import styles from "./talk.module.css";
 import Image from 'next/image';
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTogievelabsModalStore } from "@/store/togievelabs/useModalStore";
 
 export default function LanguageModal() {
