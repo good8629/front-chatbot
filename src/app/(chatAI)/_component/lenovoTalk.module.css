@@ -69,28 +69,10 @@
     background-color: var(--white);
     border-radius: 10px;
     font-size: 1.6rem;
-    width: 11rem;
+    width: 18rem;
     height: 4rem;
     align-content: center;
     padding: 0 1.5rem;
-}
-
-.llm_btn {
-    display: flex; 
-    align-items: center;
-    justify-content: space-between;
-    border: 1px solid var(--line);
-    background-color: var(--white);
-    border-radius: 10px;
-    font-size: 1.6rem;
-    width: 100%;
-    /* height: 4rem; */
-    align-content: center;
-    padding: 0 1.5rem;
-    font-size: 1.4rem;
-    font-weight: 500;
-    height: 5.5rem;
-    margin-bottom: 2.5rem;
 }
 
 .wrap_width {
@@ -268,8 +250,7 @@ background-color: var(--white);
     border-radius: 30px 30px 0 0;
     border: 1px solid var(--line);
     padding: 20px;
-    /* height: 80%; */
-    height: 491px;
+    height: 90%;
 }
 .modal_tit {
     display: flex;
@@ -284,28 +265,10 @@ background-color: var(--white);
 .modal_tit img {
     cursor: pointer;
 }
-.modal_sub_tit {
-    display: flex;
-    align-items: center;
-    margin-bottom: 2.5rem;
-}
-.modal_sub_tit h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-}
-.modal_sub_tit span {
-    font-size: 1.5rem;
-    margin-left: 3px;
-    color: #2955f4;
-}
 .lang_con {
     margin-bottom: 2.5rem;
     max-height: calc(95% - 107px);
-    background-color: var(--white);
-    border: 1px solid var(--gray-text);
-    height: 100%;
     overflow-y: auto;
-    border-radius: 10px;
 }
 .lang_tab {
     display: flex;
@@ -317,22 +280,17 @@ background-color: var(--white);
 .lang_tab > li {
     width: 100%;
     border-radius: 10px;
-    font-size: 1.8rem;
+    background-color: var(--white);
+    border: 1px solid var(--gray-text);
+    font-size: 1.4rem;
     font-weight: 500;
     height: 5.5rem;
     align-content: center;
-    text-align: left;
-    padding: 22px 10px;
-    cursor: pointer;
-    /* margin-left: 22px; */
-}
-.lang_tab > li:hover,
-.lang_tab > li:focus{
-    background-color: #F2F2F2;
+    text-align: center;
 }
 .lang_tab > li.on {
     border: none;
-    background-color: #f2f2f2;
+    background-color: var(--main);
     color: var(--white);
     font-weight: 800;
 }
@@ -342,44 +300,6 @@ background-color: var(--white);
     color: var(--line);
 }
 .lang_tab > li > span {
-    display: block;
-    font-size: 1.2rem;
-}
-.agent_con {
-    margin-bottom: 2.5rem;
-    max-height: calc(95% - 107px);
-    overflow-y: auto;
-}
-.agent_tab {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.agent_tab > li {
-    width: 48%;
-    border-radius: 10px;
-    background-color: var(--white);
-    border: 1px solid var(--gray-text);
-    font-size: 1.4rem;
-    font-weight: 500;
-    height: 5.5rem;
-    align-content: center;
-    text-align: center;
-}
-.agent_tab > li.on {
-    border: none;
-    background-color: var(--main);
-    color: var(--white);
-    font-weight: 800;
-}
-.agent_tab > li.dis {
-    background-color: var(--disabled-bg);
-    border: 1px solid var(--disabled-text);
-    color: var(--line);
-}
-.agent_tab > li > span {
     display: block;
     font-size: 1.2rem;
 }

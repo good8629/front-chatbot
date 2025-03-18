@@ -1,12 +1,9 @@
-/* eslint-disable react/no-unescaped-entities */
-
 "use client";
 
+import styles from './ysuTalk.module.css';
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from "next/navigation";
-import { useModalStore } from "@/store/lenovo/useModalStore";
-import styles from './talk.module.css';
-import Image from 'next/image';
 import Link from "next/link";
 
 interface Message {
@@ -35,67 +32,143 @@ export default function Talk() {
     const searchParams = useSearchParams();
 
     const [question, setQuestion] = useState("");
+    const [language, setLanguageMessage] = useState("한국어");
+    const [useMessage, setUseMessage] = useState("이용중");
     const [typingMessage, setTypingMessage] = useState<string>("");
     const [placeholderMessage, setPlaceholderMessage] = useState("대화를 입력 해보세요.");
-    const [dropdownLanguage, setDropdownLanguage] = useState("Model");
+    const [dropdownLanguage, setDropdownLanguage] = useState("Language");
+    //const [isCheck, setIsCheck] = useState(false);
+    
     const [isSend, setIsSend] = useState(true);             // 기본 보내기 가능
-    const initMessage = "Lenovo TechDay'25 It's Time for AI-nomics 상담을 도와주는 챗봇입니다.";
-    const [randomKey, setRandomKey] = useState<number | null>(null);
+
     const [Messages, setMessages] = useState<Message[]>([
         { 
-            message: initMessage, 
+            message: '반갑습니다! 저는 영산대학교 유학 상담 AI ‘영산이’ 입니다. 우리 대학에 대해서 무엇이든 물어보세요! 질문이 구체적일수록 정확한 답변을 받으실 수 있어요. 예를 들어, 학과 정보, 지원 절차, 장학금 안내 등이 있습니다.', 
             autherType: 0, 
-            action: "MS001", 
+            action: 'MS001', 
             urls: [],
-            videos: [] 
+            videos: []
         }
     ]);
 
     useEffect(() => {
         const lang = searchParams.get("selectedLang");
-        
-        if(lang == "ChatGPT") {
+        if (lang == "Korean") {
+            setLanguageMessage("한국어");
+            setPlaceholderMessage("대화를 입력 해보세요.");
+            setDropdownLanguage("Korean");
+            setUseMessage("이용중");
             setMessages([]);
-            setDropdownLanguage("ChatGPT");
-        } else if (lang == "llama3.3:latest") {
+            setMessages([{
+                message: '반갑습니다! 저는 영산대학교 유학 상담 AI ‘영산이’ 입니다. 우리 대학에 대해서 무엇이든 물어보세요! 질문이 구체적일수록 정확한 답변을 받으실 수 있어요. 예를 들어, 학과 정보, 지원 절차, 장학금 안내 등이 있습니다.',
+                autherType: 0,
+                action: 'MS001',
+                urls: [],
+                videos: []
+            }])
+        } else if(lang == "English (American)") {
+            setLanguageMessage("미국 영어");
+            setPlaceholderMessage("Enter a conversation.");
+            setDropdownLanguage("English");
+            setUseMessage("In use");
             setMessages([]);
-            setDropdownLanguage("llama3.3:latest");
-        } else if (lang == "gemma2:27b") {
+            setMessages([{
+                message: 'Hello! I am Yeongsan AI, a study abroad counseling AI at Yeongsand University. Ask me anything about our university! The more specific your question is, the more accurate your answer will be. For example, you can ask about department information, application procedures, scholarship information, and more',
+                autherType: 0,
+                action: 'MS001',
+                urls: [],
+                videos: []
+            }])
+        } else if(lang == "Vietnamese") {
+            setLanguageMessage("베트남어");
+            setPlaceholderMessage("Hãy nhập đoạn hội thoại.");
+            setDropdownLanguage("Vietnamese");
+            setUseMessage("Đang sử dụng");
             setMessages([]);
-            setDropdownLanguage("gemma2:27b");
-        } else if (lang == "gemma2:2b") {
+            setMessages([{
+                message: 'Xin chào! Tôi là Youngsan AI, trợ lý tư vấn du học tại Đại học Youngsan. Bạn có thể hỏi tôi bất cứ điều gì về trường đại học của chúng tôi! Càng cụ thể câu hỏi của bạn, tôi càng cung cấp cho bạn câu trả lời chính xác hơn. Ví dụ như thông tin về khoa, thủ tục ứng tuyển, thông tin về học bổng, v.v.', 
+                autherType: 0,
+                action: 'MS001',
+                urls: [],
+                videos: []
+            }]);
+        } else if(lang == "Arabic (Modern Standard)") {
+            setLanguageMessage("현대 표준 아랍어");
+            setPlaceholderMessage("أدخل محادثة.");
+            setDropdownLanguage("Arabic");
+            setUseMessage("في الاستخدام");
             setMessages([]);
-            setDropdownLanguage("gemma2:2b");
-        } else if (lang == "deepseek-r1:70b") {
+            setMessages([{
+                message: "مرحبا! أنا \"يونغسان\" ، مساعد الذكاء الاصطناعي للاستشارات الدراسية في جامعة يونغسان. اسألني أي شيء عن جامعتنا! ستحصل على إجابات أكثر دقة إذا كانت أسئلتك محددة. على سبيل المثال، يمكنك سؤالي عن معلومات القسم، وإجراءات التقديم، ومعلومات المنح الدراسية، وغيرها الكثير.", 
+                autherType: 0,
+                action: 'MS001',
+                urls: [],
+                videos: []
+            }]);
+        } else if(lang == "Indonesian") {
+            setLanguageMessage("인도네시아어");
+            setUseMessage("Sedang digunakan");
+            setPlaceholderMessage("Masukan percakapan Anda.");
+            setDropdownLanguage("Indonesian");
             setMessages([]);
-            setDropdownLanguage("deepseek-r1:70b");
-        } else if (lang == "granite3.1-dense:latest") {
+            setMessages([{
+                message: 'Selamat siang! Saya adalah Youngsan AI Counselor, “Youngsani”, dari Youngsan University. Silakan bertanya tentang universitas kami. Semakin spesifik pertanyaan Anda, semakin akurat jawaban yang akan Anda dapatkan. \n\nContohnya, informasi tentang jurusan, prosedur pendaftaran, atau panduan beasiswa.',
+                autherType: 0,
+                action: 'MS001',
+                urls: [],
+                videos: []
+            }]);
+        } else if(lang == "Japanese") {
+            setLanguageMessage("일본어");
+            setUseMessage("使用中");
+            setPlaceholderMessage("対話を入力してみてください.");
+            setDropdownLanguage("Japanese");
             setMessages([]);
-            setDropdownLanguage("granite3.1-dense:latest");
+            setMessages([{
+                message: 'こんにちは！私は英山大学留学相談AI「영산이」です。\n\n私たちの大学について、何でも質問してください！質問が具体的であればあるほど、正確な回答を得ることができます。 例えば、学科の情報、応募手続き、奨学金制度などの情報提供ができます',
+                autherType: 0,
+                action: 'MS001',
+                urls: [],
+                videos: []
+            }]);
+        } else if(lang == "Chinese (Simplified)") {
+            setLanguageMessage("간체 중국어");
+            setUseMessage("使用中");
+            setPlaceholderMessage("请输入对话.");
+            setDropdownLanguage("Chinese");
+            setMessages([]);
+            setMessages([{
+                message: '你好！我是영산대학교留学咨询AI“영산이”。关于我们大学，你有什么问题都可以问我！问题越具体，你获得的答案就越准确。例如，你可以询问专业信息、申请流程、奖学金等内容。',
+                autherType: 0,
+                action: 'MS001',
+                urls: [],
+                videos: []
+            }]);
+        } else {
+            //redirect('/');
+            setLanguageMessage("한국어");
+            setPlaceholderMessage("대화를 입력 해보세요.");
+            setUseMessage("이용중");
+            setMessages([]);
+            setMessages([{
+                message: '반갑습니다! 저는 영산대학교 유학 상담 AI ‘영산이’ 입니다. 우리 대학에 대해서 무엇이든 물어보세요! 질문이 구체적일수록 정확한 답변을 받으실 수 있어요. 예를 들어, 학과 정보, 지원 절차, 장학금 안내 등이 있습니다.',
+                autherType: 0,
+                action: 'MS001',
+                urls: [],
+                videos: []
+            }])
         }
 
-        setMessages([{
-            message: initMessage,
-            autherType: 0,
-            action: 'MS001',
-            urls: [],
-            videos: []
-        }])
-
-        if (randomKey === null) {
-            setRandomKey(Math.floor(Math.random() * 1000000));
-        }
-
-    }, [searchParams, randomKey]); // searchParams가 변경될 때 실행
+    }, [searchParams]); // searchParams가 변경될 때 실행
 
     const sendMessageToServer = async (userQuestion: string) => {
-        console.log(randomKey);
-
         try {
-            const res = await fetch("/api/openapi", {
+            setIsSend(false);
+
+            const res = await fetch("/api/ysu", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: userQuestion, llmModel: dropdownLanguage, key: randomKey}),
+                body: JSON.stringify({ question: userQuestion, language }),
             });
 
             if (!res.ok) {
@@ -103,13 +176,14 @@ export default function Talk() {
             }
 
             const data = await res.json();
-
+            //console.log(data);
+            
             let urls = [];
             if (data.info.action != 'MS001') {
                 urls = data.info.sub_info.urls;
             }
 
-            // 유튜브 영상일때 전달받음
+            // 유튜브 틀어달라는 영상일때 전달받음
             let videos = [];
             if(data.info.action == "MS002") {
                 videos = data.info.sub_info.videos;
@@ -126,15 +200,14 @@ export default function Talk() {
             // 3. AI 답변을 타이핑 효과로 표시하기 전에 빈 AI 메시지 블록 추가
             setMessages((prevMessages) => [
                 ...prevMessages,
-                { message: "", autherType: 0, action: data.info.action, urls: urls, videos: [] } // 빈 메시지 추가 후 타이핑
+                { message: "", autherType: 0, action: data.info.action, urls: urls, videos: videos } // 빈 메시지 추가 후 타이핑
             ]);
 
             // 2. 입력 필드 초기화
             setQuestion("");
             typingEffect(reMessage);
-
         } catch (error) {
-            setIsSend(false);
+            setIsSend(true);
             console.error("Error while sending request:", error);
         } finally {
             setIsSend(false);
@@ -146,9 +219,8 @@ export default function Talk() {
 
     const handleSubmit = () => {
         if (!question.trim()) return;
+        //question.indexOf("영산대") == -1 ? setIsCheck(true) : setIsCheck(false);
         
-        setIsSend(false);
-
         // setTimeout을 사용하여 입력값 초기화 시점 조정
         setTimeout(() => {
             setQuestion("");
@@ -200,7 +272,7 @@ export default function Talk() {
         if (event.key === "Enter" && !enterPressed.current) {
             enterPressed.current = true;
             handleSubmit();         // Enter 키를 누르면 버튼 클릭 실행
-            setTimeout(() => {
+            setTimeout(() =>{
                 enterPressed.current = false;
             }, 500);
         }
@@ -228,10 +300,11 @@ export default function Talk() {
                 </div>
             )
         } else if(msg.action == "MS003") {              // 날씨
+            // 이미지로 대체함
             return(
                 <>
                     <div className={styles.lef_chat_con}>
-                        <Image src="/images/img-weather.png" alt="weather" width={292} height={205.26}></Image>
+                        <Image src="/images/img-weather-v1.png" alt="weather" width={292} height={205.26}></Image>
                     </div>
                 </>
             )
@@ -267,13 +340,22 @@ export default function Talk() {
                 </div>
             ))
         )
+        // return(
+        //     <div className={`${styles.youtube_wrap} ${styles.mb15}`} key={`youtube-${0}`}>
+        //         {/* <Image src={msg.videos[0].thumbnails} alt="youtube" width={116.8} height={64.34} layout="intrinsic"></Image> */}
+        //         <img src="https://i.ytimg.com/vi/yiRqq9KBhd4/hq720.jpg" alt="YouTube Thumbnail" width={116.8} height={64.34} />
+        //         <p>
+        //             {msg.videos[0].title}
+        //         </p>
+        //     </div>
+        // )
     }
 
     const sendMessage = () => {
         if(isSend) {
             return (
                 <button type="submit" onClick={handleSubmit}>
-                    <Image src="/images/ico-send.svg" alt="send" width={50} height={40}/>
+                    <Image src="/images/ysu/ico-send.svg" alt="send" width={50} height={40}/>
                 </button>
             )
         } else {
@@ -283,12 +365,7 @@ export default function Talk() {
                 </button>
             )
         }
-    }
-    
-    //
-    const sendMessageToParent = (data: string) => {
-        localStorage.setItem("modalData", JSON.stringify({ type: "OPEN_MODAL", data }));
-    };
+    } 
 
     // 메시지가 추가될 때 스크롤을 맨 아래로 이동 (채팅 스크롤 최하단 유지기능)
     const chatEndRef = useRef<HTMLDivElement | null>(null); // 마지막 메시지 참조
@@ -296,23 +373,16 @@ export default function Talk() {
         if (chatEndRef.current) {
             chatEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
-
-        // 특정 드롭다운 값 선택 시 부모에게 메시지 전송
-        sendMessageToParent(dropdownLanguage);
-
     }, [Messages, typingMessage]); // messages 또는 typingMessage가 변경될 때 실행
-
-    //
-    const openModal = useModalStore((state) => state.openModel);
 
     return(
         <>
             <header>
                 <div className={styles.header_inner}>
-                    <Image src="/images/img-chat-logo.png" alt="logo" width={116} height={35}></Image>
-                    <p className={styles.wrap_width}>
-                    </p>
-                    <Link href="/i/language" className={styles.lan_btn} onClick={() => openModal(dropdownLanguage)}>
+                    <a>
+                        <Image src="/images/img-logo-new.png" alt="logo" width={77} height={36}></Image>
+                    </a>
+                    <Link href="/chatbot/ysu/mobile/i/language" className={styles.lan_btn}>
                         {dropdownLanguage} <Image src="/images/ico-dropdown.svg" alt="dropdown" width={18} height={10}/>
                     </Link>
                 </div>
@@ -323,10 +393,10 @@ export default function Talk() {
                         msg.autherType === 0 ? (
                             <div className={styles.lef_chat} key={`ai-${index}`}>
                                 <div className={styles.lef_chat_tit}>
-                                    <Image src="/images/ico-chat.svg" alt="chat_logo" width={40} height={40} />
+                                    <Image src="/images/ysu/ico-chat.svg" alt="chat_logo" width={40} height={40} />
                                     <div className={styles.lef_chat_tit_txt}>
-                                        <h2>Chat AI</h2>
-                                        <p>TOGIEVE Labs</p>
+                                        <h2>Y'sU</h2>
+                                        <p>영산대학교</p>
                                     </div>
                                 </div>
                                 {renderChatMessage(msg, index, typingMessage)}
@@ -344,7 +414,7 @@ export default function Talk() {
                 <div className={styles.footer_inner}>
                     <div className={styles.using_txt}>
                         <Image src="/images/ico-smile.svg" alt="smile" width={16} height={15}/>
-                        <p>Chat AI 이용중</p>
+                        <p>Chat AI {useMessage}</p>
                     </div>
                     <div className={styles.chat_con}>
                         <input type="text" placeholder={placeholderMessage} value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={handleKeyDown}/>

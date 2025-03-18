@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from "next/navigation";
-import { useModalStore } from "@/store/useModalStore";
+import { useTogievelabsModalStore } from "@/store/togievelabs/useModalStore";
 import styles from './talk.module.css';
 import Image from 'next/image';
 import Link from "next/link";
@@ -40,13 +40,11 @@ interface SubInfo {
 
 export default function Talk() {
     const searchParams = useSearchParams();
-
     const [question, setQuestion] = useState("");
     const [typingMessage, setTypingMessage] = useState<string>("");
     const [placeholderMessage, setPlaceholderMessage] = useState("대화를 입력 해보세요.");
-    const [dropdownLanguage, setDropdownLanguage] = useState("Model");
     const [isSend, setIsSend] = useState(true);             // 기본 보내기 가능
-    const initMessage = "투기브랩스 테스트 챗봇.";
+    const initMessage = "투기브랩스 챗봇입니다. 무엇이든 물어보세요.";
     const [randomKey, setRandomKey] = useState<number | null>(null);
     const [Messages, setMessages] = useState<Message[]>([
         { 
@@ -58,49 +56,26 @@ export default function Talk() {
         }
     ]);
 
-    useEffect(() => {
-        const lang = searchParams.get("selectedLang");
-        
-        if(lang == "ChatGPT") {
-            setMessages([]);
-            setDropdownLanguage("ChatGPT");
-        } else if (lang == "llama3.3:latest") {
-            setMessages([]);
-            setDropdownLanguage("llama3.3:latest");
-        } else if (lang == "gemma2:27b") {
-            setMessages([]);
-            setDropdownLanguage("gemma2:27b");
-        } else if (lang == "gemma2:2b") {
-            setMessages([]);
-            setDropdownLanguage("gemma2:2b");
-        } else if (lang == "deepseek-r1:70b") {
-            setMessages([]);
-            setDropdownLanguage("deepseek-r1:70b");
-        } else if (lang == "granite3.1-dense:latest") {
-            setMessages([]);
-            setDropdownLanguage("granite3.1-dense:latest");
-        }
-
-        setMessages([{
-            message: initMessage,
-            autherType: 0,
-            action: 'MS001',
-            urls: [],
-            videos: []
-        }])
-
-        if (randomKey === null) {
-            setRandomKey(Math.floor(Math.random() * 1000000));
-        }
-
-    }, [searchParams, randomKey]); // searchParams가 변경될 때 실행
+    const { llm, agents, openTogievelabsModal } = useTogievelabsModalStore();
 
     const sendMessageToServer = async (userQuestion: string) => {
+        const mapping = new Map<string, string>([
+            ["맛집", "restaurant_tool"],
+            ["날씨", "weather_tool"],
+            ["Youtube", "youtube_tool"],
+        ]);
+
+        const replacedAgents = agents.map(item => mapping.get(item) || item);
+
+        //console.log(agents);
+        //console.log(llm);
+
         try {
-            const res = await fetch("/api/openapi", {
+            const res = await fetch("/api/chatbot", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: userQuestion, llmModel: dropdownLanguage, key: randomKey}),
+                //body: JSON.stringify({ question: userQuestion, llmModel: dropdownLanguage, key: randomKey}),
+                body: JSON.stringify({ question: userQuestion, llmModel: llm, key: randomKey, agents: replacedAgents}),
             });
 
             if (!res.ok) {
@@ -108,7 +83,6 @@ export default function Talk() {
             }
 
             const data = await res.json();
-            console.log(data);
 
             let urls = [];
             if (data.info.action != 'MS001') {
@@ -387,12 +361,29 @@ export default function Talk() {
         }
 
         // 특정 드롭다운 값 선택 시 부모에게 메시지 전송
-        sendMessageToParent(dropdownLanguage);
+        sendMessageToParent(llm); 
 
     }, [Messages, typingMessage]); // messages 또는 typingMessage가 변경될 때 실행
 
     //
-    const openModal = useModalStore((state) => state.openModel);
+    //const openModal = useModalStore((state) => state.openModel);
+
+    useEffect(() => {
+        //setMessages([]);
+
+        // setMessages([{
+        //     message: initMessage,
+        //     autherType: 0,
+        //     action: 'MS001',
+        //     urls: [],
+        //     videos: []
+        // }])
+
+        if (randomKey === null) {
+            setRandomKey(Math.floor(Math.random() * 1000000));
+        }
+
+    }, [searchParams, randomKey]); // searchParams가 변경될 때 실행
 
     return(
         <>
@@ -401,8 +392,8 @@ export default function Talk() {
                     <Image src="/images/img-chat-logo.png" alt="logo" width={116} height={35}></Image>
                     <p className={styles.wrap_width}>
                     </p>
-                    <Link href="/i/language" className={styles.lan_btn} onClick={() => openModal(dropdownLanguage)}>
-                        {dropdownLanguage} <Image src="/images/ico-dropdown.svg" alt="dropdown" width={18} height={10}/>
+                    <Link href="/chatbot/togievelabs/mobile/i/language" className={styles.lan_btn} onClick={() => openTogievelabsModal("", [])}>
+                        <Image src="/images/togievelabs/ico-option.png" alt="dropdown" width={15} height={15}/> Options
                     </Link>
                 </div>
             </header>

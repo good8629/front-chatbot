@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback} from "react";
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
-import styles from '@/app/(chatAI)/_component/talk.module.css';
-import { useModalStore } from "@/store/useModalStore";
+import styles from '@/app/(chatAI)/_component/lenovoTalk.module.css';
+import { useModalStore } from "@/store/lenovo/useModalStore";
 
 export default function Home() {
     const router = useRouter();
@@ -21,7 +21,7 @@ export default function Home() {
 
         if (isMobile) {
             // 모바일 페이지로 리다이렉트
-            router.push("/");
+            router.push("./lenovo/mobile");
         }
 
         const handleStorageChange = (event: StorageEvent) => {
@@ -79,7 +79,7 @@ export default function Home() {
                         {modelInfo()}
                     </div>
                     <div className={styles.pc_right}>
-                        <iframe src="/" width="393" height="700" className={styles.pc_background}></iframe>
+                        <iframe src="./lenovo/mobile" width="393" height="700" className={styles.pc_background}></iframe>
                     </div>
                 </div>
             </div>

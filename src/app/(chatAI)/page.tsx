@@ -8,10 +8,12 @@ import styles from '@/app/(chatAI)/_component/talk.module.css';
 
 export default function Home() {
     return(
-        <Suspense fallback={<p>Loading...</p>}>
-            <div className={styles.body}>
-                <Talk></Talk>
-            </div>
-        </Suspense>
+        <>
+        </>
+        // <Suspense fallback={<p>Loading...</p>}>
+        //     <div className={styles.body}>
+        //         <Talk></Talk>
+        //     </div>
+        // </Suspense>
     )
 }
