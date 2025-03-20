@@ -16,12 +16,29 @@ interface Message {
     urls: string[];
     videos: YouTubes[];
     sub_info?: SubInfo;
+    recommendation_image: FashionImages[];
 }
 
 interface YouTubes{
     title: string,
     url: string,
     thumbnails: string
+}
+
+interface FashionImages{
+    brand: string,
+    category_middle: string,
+    category_sub: string,
+    category_top: string,
+    discount_price: number,
+    image_url: string,
+    price: number,
+    price_rate: number,
+    product: string,
+    product_code: string,
+    product_url: string,
+    review_count: number,
+    review_score: number
 }
 
 interface responseMessage {
@@ -31,6 +48,7 @@ interface responseMessage {
     urls: string[];
     videos: YouTubes[];
     sub_info: SubInfo;
+    recommendation_image: FashionImages[];
 }
 
 interface SubInfo {
@@ -44,7 +62,7 @@ export default function Talk() {
     const [typingMessage, setTypingMessage] = useState<string>("");
     const [placeholderMessage, setPlaceholderMessage] = useState("대화를 입력 해보세요.");
     const [isSend, setIsSend] = useState(true);             // 기본 보내기 가능
-    const initMessage = "투기브랩스 챗봇입니다. 무엇이든 물어보세요.";
+    const initMessage = "AI Qurator 입니다. 무엇이든 물어보세요.";
     const [randomKey, setRandomKey] = useState<number | null>(null);
     const [Messages, setMessages] = useState<Message[]>([
         { 
@@ -52,7 +70,8 @@ export default function Talk() {
             autherType: 0, 
             action: "MS001", 
             urls: [],
-            videos: []
+            videos: [],
+            recommendation_image: []
         }
     ]);
 
@@ -63,12 +82,10 @@ export default function Talk() {
             ["맛집", "restaurant_tool"],
             ["날씨", "weather_tool"],
             ["Youtube", "youtube_tool"],
+            ["패션", "fashion_tool"],
         ]);
 
         const replacedAgents = agents.map(item => mapping.get(item) || item);
-
-        //console.log(agents);
-        //console.log(llm);
 
         try {
             const res = await fetch("/api/chatbot", {
@@ -83,15 +100,16 @@ export default function Talk() {
             }
 
             const data = await res.json();
+            console.log(data);
 
             let urls = [];
-            if (data.info.action != 'MS001') {
+            if (data.info.action !== 'MS001') {
                 urls = data.info.sub_info.urls;
             }
 
             // 유튜브 영상일때 전달받음
             let videos = [];
-            if (data.info.action == "MS002") {
+            if (data.info.action === "MS002") {
                 videos = data.info.sub_info.videos;
             }
 
@@ -99,16 +117,26 @@ export default function Talk() {
             let eats = [];
             let location = '';
             let restaurant = '';
-            if (data.info.action == "MS004") {
+            if (data.info.action === "MS004") {
                 eats = data.info.sub_info;
                 location = data.info.sub_info.location;
                 restaurant = data.info.sub_info.restaurant;
             }
 
+            // 패션
+            let fashions = [];
+            if(data.info.action === "MS006") {
+                fashions = data.info.sub_info.recommendation_image;
+                let randomFashion = getTopElements(fashions, 5);
+                //console.log(randomFashion);
+                fashions = randomFashion;
+                //console.log(fashions);
+            }
+
             // 3. AI 답변을 타이핑 효과로 표시하기 전에 빈 AI 메시지 블록 추가
             setMessages((prevMessages) => [
                 ...prevMessages,
-                { message: "", autherType: 0, action: data.info.action, urls: urls, videos: [] } // 빈 메시지 추가 후 타이핑
+                { message: "", autherType: 0, action: data.info.action, urls: urls, videos: [], recommendation_image: [] } // 빈 메시지 추가 후 타이핑
             ]);
 
             const reMessage: responseMessage = {
@@ -117,10 +145,11 @@ export default function Talk() {
                 action: data.info.action,
                 urls: urls,
                 videos: videos,
-                sub_info: eats
+                sub_info: eats,
+                recommendation_image: fashions
             };
 
-            if (data.info.action === "MS001" || data.info.action === "MS002" || data.info.action === "MS003") {
+            if (data.info.action === "MS001" || data.info.action === "MS002" || data.info.action === "MS003" || data.info.action === "MS006") {
                 typingEffect(reMessage);
             } else if(data.info.action === "MS004") {
                 restaurantInfo(location, restaurant, reMessage);
@@ -156,7 +185,7 @@ export default function Talk() {
         // 사용자 질문 추가
         setMessages((prevMessages) => [
             ...prevMessages,
-            { message: question, autherType: 1, action: 'MS001', urls: [], videos: [] }
+            { message: question, autherType: 1, action: 'MS001', urls: [], videos: [], recommendation_image: [] }
         ]);
 
         // 입력 필드 초기화
@@ -183,7 +212,8 @@ export default function Talk() {
                         action: reMessage.action,
                         urls: reMessage.urls,
                         videos: reMessage.videos,
-                        sub_info: reMessage.sub_info
+                        sub_info: reMessage.sub_info,
+                        recommendation_image: reMessage.recommendation_image
                     };
                     
                     setIsSend(true);            // 입력 완료시점
@@ -296,6 +326,12 @@ export default function Talk() {
                     </div>
                 );
             }
+        } else if(msg.action == "MS006") {
+            return (
+                <div className={styles.lef_chat_con}>
+                    {fashionMessage(msg)}
+                </div>
+            )
         } else {
             return(
                 <>
@@ -323,12 +359,25 @@ export default function Talk() {
         )
     }
 
-    // restaurant action
-    const restaurantMessage = async (msg: Message) => {
+    // fashion action
+    const fashionMessage = (msg: Message) => {
         return(
-            <div>
-               {/* {msg.sub_info?.location} {msg.sub_info?.restaurant}  */}
-            </div>
+            msg.recommendation_image.map((item, index) => (
+                <a className={`${styles.fashion_wrap} ${styles.mb15}`} key={`fashion-${index}`} target='_blank' href={item.product_url}>
+                    <span className={styles.fashion_left}>
+                        <img className={styles.fastion_image_container} src={item.image_url} alt="YouTube Thumbnail" width={116.8} height={64.34} />
+                    </span>
+                    <span className={styles.fashion_right}>
+                        <div className={styles.fashion_brand}>{item.brand}</div>
+                        <div className={styles.fashion_product}>{item.product}</div>
+                        {
+                            item.price_rate > 0 ? 
+                            <div className={styles.fashion_price_container}><span className={styles.fashion_rate}>{Math.floor(item.price_rate)}%</span> <span className={styles.fashion_price}>{Math.floor(item.discount_price).toLocaleString("ko-KR")}</span></div> : 
+                            <div className={styles.fashion_price_container}><span className={styles.fashion_price}>{Math.floor(item.price).toLocaleString("ko-KR")}</span></div>
+                        }
+                    </span>
+                </a>
+            ))
         )
     }
 
@@ -385,14 +434,37 @@ export default function Talk() {
 
     }, [searchParams, randomKey]); // searchParams가 변경될 때 실행
 
+    // zustand 상태관리
+    const openModal = useTogievelabsModalStore((state) => state.openTogievelabsModal);
+
+    function getRandomElements<T>({ arr, count }: { arr: T[]; count: number; }): any {
+        const shuffled = [...arr]; // 원본 배열을 복사하여 수정 방지
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // 요소 교환
+        }
+        return shuffled.slice(0, count); // 앞에서 count 개수만큼 추출
+    }
+
+    function getTopElements(arr: any[], count: number): any {
+        const sortedProducts = arr.sort((a, b) => {
+            if (b.reviews !== a.reviews) {
+              return b.reviews - a.reviews; // 1. 리뷰 수 기준 내림차순
+            }
+            return b.price - a.price;       // 2. 리뷰 수가 같으면 금액 기준 내림차순
+        });
+
+        return sortedProducts.slice(0, count); // 배열의 첫 `count` 개 요소 반환
+    }
+      
     return(
         <>
             <header>
                 <div className={styles.header_inner}>
-                    <Image src="/images/img-chat-logo.png" alt="logo" width={116} height={35}></Image>
+                    <Image src="/images/togievelabs/icon-qurator-logo.svg" alt="logo" width={116} height={35}></Image>
                     <p className={styles.wrap_width}>
                     </p>
-                    <Link href="/chatbot/togievelabs/mobile/i/language" className={styles.lan_btn} onClick={() => openTogievelabsModal("", [])}>
+                    <Link href="/chatbot/togievelabs/mobile/i/language" className={styles.lan_btn} onClick={() => openModal(llm, agents)}>
                         <Image src="/images/togievelabs/ico-option.png" alt="dropdown" width={15} height={15}/> Options
                     </Link>
                 </div>
@@ -403,9 +475,9 @@ export default function Talk() {
                         msg.autherType === 0 ? (
                             <div className={styles.lef_chat} key={`ai-${index}`}>
                                 <div className={styles.lef_chat_tit}>
-                                    <Image src="/images/ico-chat.svg" alt="chat_logo" width={40} height={40} />
+                                    <Image src="/images/togievelabs/icon-chat.svg" alt="chat_logo" width={40} height={40} />
                                     <div className={styles.lef_chat_tit_txt}>
-                                        <h2>Chat AI</h2>
+                                        <h2>Qurator</h2>
                                         <p>TOGIEVE Labs</p>
                                     </div>
                                 </div>

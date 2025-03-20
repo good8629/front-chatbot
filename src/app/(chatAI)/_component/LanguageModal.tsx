@@ -3,7 +3,7 @@
 import styles from "./talk.module.css";
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTogievelabsModalStore } from "@/store/togievelabs/useModalStore";
 
 export default function LanguageModal() {
@@ -25,12 +25,12 @@ export default function LanguageModal() {
     const agentList = [
         "Youtube",
         "맛집",
-        "날씨"
+        "패션"
     ];
 
-    const { openTogievelabsModal } = useTogievelabsModalStore();
-    const [selectedLLm, setSelectedLLm] = useState("ChatGPT");              // LLM 초기 선택값
-    const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
+    const { llm, agents, openTogievelabsModal } = useTogievelabsModalStore();
+    const [selectedLLm, setSelectedLLm] = useState("ChatGPT");                          // LLM 초기 선택값
+    const [selectedAgents, setSelectedAgents] = useState<string[]>(["Youtube"]);        // Agent 초기 선택값
 
     // 확인 버튼 클릭 시 부모에게 값 전달 후 모달 닫기
     const handleConfirm = () => {
@@ -52,12 +52,10 @@ export default function LanguageModal() {
         );
     }
 
-    const { llm, agents }: {llm: string, agents: string[]} = useTogievelabsModalStore();
-    //console.log(llm);
-    //console.log(agents);
-    // useEffect(() => {
-    //     setSelectedLLm(llm);
-    // }, []);
+    useEffect(() => {
+        setSelectedLLm(llm);
+        setSelectedAgents(agents);      // 부모창에서 넘어온 agents값
+    }, []);
 
     return(
         <>
@@ -99,7 +97,7 @@ export default function LanguageModal() {
                                                     </li>
                                                 ))
                                             }
-                                            <li className={styles.dis}>패션</li>
+                                            <li className={styles.dis}>날씨</li>
                                             <li className={styles.dis}>음악</li>
                                             <li className={styles.dis}>도서</li>
                                         </ul>
